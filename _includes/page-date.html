@@ -1,0 +1,13 @@
+<time class="page-date dt-published" datetime="{{ page.date | date_to_xmlschema }}">
+  <div class="create-date">
+    {%- assign date_format = site.date_format | default: "%B %-d, %Y" -%}
+    <em>{% if site.data.text[site.locale].created_at %}{{ site.data.text[site.locale].created_at }} {% endif %}<a class="u-url" href="{{ entry.url | relative_url }}">{{ page.date | date: date_format }}</a></em>
+  </div>
+
+  <div class="update-date">
+    {%- if page.last_modified_at -%}
+      <em>{% if site.data.text[site.locale].updated_at %}{{ site.data.text[site.locale].updated_at }} {% endif %}<a class="u-url" href="{{ entry.url | relative_url }}">{{ page.last_modified_at | date: date_format }}</a></em>
+    {%- endif -%}
+  </div>
+</time>
+

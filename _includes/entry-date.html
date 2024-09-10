@@ -1,0 +1,6 @@
+{%- unless page.layout == 'collection' -%}
+  <time class="entry-date dt-published" datetime="{{ entry.date | date_to_xmlschema }}">
+    {%- assign date_format = site.date_format | default: "%B %-d, %Y" -%}
+    <em>{% if site.data.text[site.locale].created_at and page.entries_layout == 'list' %}{{ site.data.text[site.locale].created_at }} {% endif %}{{ entry.date | date: date_format }}</em>
+  </time>
+{%- endunless -%}
