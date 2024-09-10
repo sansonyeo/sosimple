@@ -4,7 +4,7 @@ remote_theme: mmistakes/so-simple-theme
 skin: "/assets/css/skins/default.css"
 locale: ko-KR
 title: "아마도, 산 이야기"
-description: "등산은 자기과시가 아니며, 대가를 요구하지 않는 인간의 의식과 행동이며, 자연에 대한 가장 순수하고 가장 가혹하며 가장 신중한 도전이다. - 리오넬 테레이"
+description: "산행일지, 산악도서 정리하는 블로그"
 baseurl: # the subpath of your site, e.g. "/blog"
 url: "https://sansonyeo.github.io" # the base hostname & protocol for your site
 logo: /images/logo-500x500.png # path of site logo, e.g. "/images/logo.png"
