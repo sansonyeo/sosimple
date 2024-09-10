@@ -1,30 +1,16 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely edit after that. If you find
-# yourself editing this file very often, consider using Jekyll's data files
-# feature for the data you need to update frequently.
-#
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
-
 # Site settings
-# These are used to personalize your new site. If you look in the HTML files,
-# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
-# You can create any custom variable you would like, and they will be accessible
-# in the templates via {{ site.myvariable }}.
 # theme: jekyll-theme-so-simple
 remote_theme: mmistakes/so-simple-theme
 skin: "/assets/css/skins/default.css"
-locale: ko-KR # customized by olvi
-title: "read ANYthing, write MESSily" # customized by olvi
-description: "I write once in a blue moon XD" # customized by olvi
+locale: ko-KR
+title: "아마도, 산 이야기"
+description: "등산은 자기과시가 아니며, 대가를 요구하지 않는 인간의 의식과 행동이며, 자연에 대한 가장 순수하고 가장 가혹하며 가장 신중한 도전이다. - 리오넬 테레이"
 baseurl: # the subpath of your site, e.g. "/blog"
-url: "https://sansonyeo.github.io" # the base hostname & protocol for your site # customized by olvi
-logo: /images/logo.png # path of site logo, e.g. "/images/logo.png"
-date_format: "%Y-%m-%d" # default: "%B %-d, %Y" # customized by olvi
+url: "https://sansonyeo.github.io" # the base hostname & protocol for your site
+logo: /images/logo-500x500.png # path of site logo, e.g. "/images/logo.png"
+date_format: "%Y-%m-%d" # default: "%B %-d, %Y"
 read_time: true # reading time estimates, e.g. true
-words_per_minute: 175 # customized by olvi (default:200)
+words_per_minute: 175 # (default:200)
 mathjax:
   enable: # MathJax equations, e.g. true, false (default)
   combo:  # "tex-svg" (default), "tex-mml-chtml", etc.: docs.mathjax.org/en/latest/web/components/combined.html
@@ -36,7 +22,7 @@ google_fonts:
     weights: "400,400i,700,700i"
   - name: "Lora"
     weights: "400,400i,700,700i"
-google_analytics: # "UA-191811352-1" # Google Analytics id, e.g. "UA-NNNNNNNN-N" # customized by olvi
+google_analytics: # Google Analytics id, e.g. "UA-NNNNNNNN-N" # customized by olvi
 disqus:
   shortname: # Disqus shortname, e.g. "my_disqus_shortname"
 twitter:
