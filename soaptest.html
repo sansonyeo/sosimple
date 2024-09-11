@@ -1,0 +1,31 @@
+<html>
+
+<script type="text/javascript">
+
+    function run(){
+
+        var objXMLHttpRequest = new XMLHttpRequest();
+        objXMLHttpRequest.open("GET", "http://localhost:86/WebService1.asmx/SELECT_SITE?wsdl/", true);
+        objXMLHttpRequest.onreadystatechange = function () {
+        if (objXMLHttpRequest.readyState == 4 && objXMLHttpRequest.status == 200) {
+            result = objXMLHttpRequest.responseXML;
+            alert(objXMLHttpRequest.responseText);
+            alert(objXMLHttpRequest.responseXML);
+          }
+        }
+        objXMLHttpRequest.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+
+        var packet = '<?xml version="1.0" encoding="utf-8" ?><soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><getVersion xmlns="http://service.web.com.crunchify/"></getVersion></soap:Body></soap:Envelope>';
+
+        objXMLHttpRequest.send(packet);
+        response = objXMLHttpRequest.responseXML;
+        alert(objXMLHttpRequest.responseText+ "  "+ response);
+    }
+</script>
+
+<head>
+</head>
+<body>
+    <button  onclick="run()">Dale!</button>
+</body>
+</html>
