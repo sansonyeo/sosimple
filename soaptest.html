@@ -9,8 +9,8 @@
         objXMLHttpRequest.onreadystatechange = function () {
         if (objXMLHttpRequest.readyState == 4 && objXMLHttpRequest.status == 200) {
             result = objXMLHttpRequest.responseXML;
-            alert(objXMLHttpRequest.responseText);
-            alert(objXMLHttpRequest.responseXML);
+            alert("성공1==>" + objXMLHttpRequest.responseText);
+            alert("성공2==>" + objXMLHttpRequest.responseXML);
           }
         }
         objXMLHttpRequest.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
@@ -19,7 +19,7 @@
 
         objXMLHttpRequest.send(packet);
         response = objXMLHttpRequest.responseXML;
-        alert(objXMLHttpRequest.responseText+ "  "+ response);
+        alert("포켓==>" + objXMLHttpRequest.responseText+ "  "+ response);
     }
 </script>
 
