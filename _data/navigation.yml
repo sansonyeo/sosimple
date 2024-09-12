@@ -12,8 +12,8 @@
 #   url: /recipes/
 - title: Search
   url: /search/
-- title: Map
-  url: /map/
+- title: Maps
+  url: /_maps/
 - title: Daily
   url: https://sansonyeo.github.io/sosimple/daily.html
 # - title: External Page
