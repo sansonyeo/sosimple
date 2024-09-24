@@ -15,8 +15,8 @@ layout: page
 
 				$.ajax({
 					type: "POST",
-					url: "https://121.167.154.99/WebService1.asmx/SelectTable",
-					data: "{ table_Name: '" + txtTableName + "', condition: '" + txtCondition + "'}",
+					url: "https://121.167.154.99/WebService1.asmx/SelectTableJson",
+					data: "{ table_Name: '" + txtTableName + "'}",
 					contentType: "application/json; charset=utf-8",
 					dataType: "json",
 					success: function (r) {
