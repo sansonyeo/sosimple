@@ -1,0 +1,31 @@
+---
+layout: page
+---
+
+<div>
+	<script type="text/javascript">
+		//wsdl request
+		var client = new XMLHttpRequest();
+		client.open('GET', 'request.wsdl');
+		client.onreadystatechange = function () {
+			var request = client.responseText;//here the wsdl
+
+			//SOAP request
+			var client2 = new XMLHttpRequest();
+			client2.open('POST', 'https://121.167.154.99/WebService1.asmx?wsdl', true);
+
+			client2.onreadystatechange = function () {
+			if (client2.readyState == 4) {
+				if (client2.status == 200) {
+					console.log(client.responseText);//here the response
+					}
+				}
+			}
+			client2.setRequestHeader('Content-Type', 'text/xml');
+			client2.send(request);
+		}
+
+		client.send();		
+	</script>
+
+</div>
