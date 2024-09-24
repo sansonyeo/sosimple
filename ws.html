@@ -15,10 +15,10 @@ layout: page
 
 				$.ajax({
 					type: "POST",
-					url: "https://121.167.154.99/WebService1.asmx?op=SelectTableJson",
+					url: "https://121.167.154.99/WebService1.asmx/SelectTableJson",
 					data: "{ table_name: '" + txtTableName + "'}",
 					contentType: "application/json; charset=utf-8",
-					dataType: "json",
+					dataType: "jsonp",
 					success: function (r) {
 						alert(r.d);
 					},
