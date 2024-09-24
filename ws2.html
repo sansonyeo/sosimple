@@ -1,0 +1,38 @@
+---
+layout: page
+---
+
+<div>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$("[id*=btnExec]").click(function () {
+				$.ajax({
+					type: "POST",
+					url: "https://121.167.154.99/WebService1.asmx/SelectTest",
+					data: "{}",
+					contentType: "application/json; charset=utf-8",
+					contentLength: "length",
+					dataType: "json",
+					success: function (r) {
+						alert(r.d);
+					},
+					error: function (r) {
+						alert(r.responseText);
+					},
+					failure: function (r) {
+						alert(r.responseText);
+					}
+				});
+				return false;
+			});
+		});
+	</script>
+
+	<form>
+		<input type='text' id='txtTableName' />
+		<input type='text' id='txtCondition' />
+		<input type='button' id='btnExec' value='Exec' />
+	</form>
+
+</div>
