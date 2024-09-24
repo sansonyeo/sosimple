@@ -10,6 +10,9 @@ layout: page
 				var txtTableName = $("[id*=txtTableName]").val();
 				var txtCondition = $("[id*=txtCondition]").val();
 
+				console.log(txtTableName);
+				console.log(txtCondition);
+
 				$.ajax({
 					type: "POST",
 					url: "https://121.167.154.99/WebService1.asmx/SelectTable",
