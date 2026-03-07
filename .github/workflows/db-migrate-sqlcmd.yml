@@ -1,0 +1,48 @@
+name: DB Migration (sqlcmd)
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: [self-hosted, linux, db]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ODBC 18 + sqlcmd (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          set -e
+          if ! command -v sqlcmd >/dev/null 2>&1; then
+            # Microsoft 공식 repo 등록 후 ODBC 18 + mssql-tools18 설치
+            curl https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
+            curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list \
+              | sudo tee /etc/apt/sources.list.d/mssql-release.list
+            sudo apt update
+            sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18 unixodbc-dev
+            echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
+            source ~/.bashrc
+          fi
+        # ODBC 18/툴 설치는 Microsoft Learn 공식 가이드와 동일한 절차입니다. [3](https://blog.ranindu.com/setting-up-self-hosted-runners-in-github-a-step-by-step-guide)[4](https://itslinuxfoss.com/install-microsoft-odbc-driver-sql-server/)
+
+      - name: Connectivity check (SELECT @@VERSION)
+        env:
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_USER:   ${{ secrets.DB_USER }}
+          DB_PASS:   ${{ secrets.DB_PASS }}
+        run: |
+          set -e
+          which sqlcmd
+          sqlcmd -S "$DB_SERVER" -U "$DB_USER" -P "$DB_PASS" -Q "SELECT @@VERSION" -b
+        # -b 옵션은 에러 시 비정상 종료코드로 실패 처리합니다(파이프라인 안전). [4](https://itslinuxfoss.com/install-microsoft-odbc-driver-sql-server/)
+
+      - name: Run migration script
+        env:
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_NAME:   ${{ secrets.DB_NAME }}
+          DB_USER:   ${{ secrets.DB_USER }}
+          DB_PASS:   ${{ secrets.DB_PASS }}
+        run: |
+          set -e
+          test -f "scripts/migrate.sql" || { echo "scripts/migrate.sql not found"; exit 1; }
+          sqlcmd -S "$DB_SERVER" -U "$DB_USER" -P "$DB_PASS" -d "$DB_NAME" -i scripts/migrate.sql -b
