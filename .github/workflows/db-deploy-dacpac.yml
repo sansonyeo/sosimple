@@ -5,21 +5,103 @@ on:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, db]     # OS 무관 (sqlpackage만 설치되어 있으면 OK)
-    steps:
-      - uses: actions/checkout@v4
+    # 실제 러너 라벨과 일치하게 유지하세요.
+    runs-on: [self-hosted, db]
 
-      - name: Ensure SqlPackage on PATH
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 1) dotnet / sqlpackage 준비
+      - name: Ensure dotnet & SqlPackage
         run: |
-          if command -v sqlpackage >/dev/null 2>&1; then
-            echo "SqlPackage found"
-          elif command -v dotnet >/dev/null 2>&1; then
-            dotnet tool update -g microsoft.sqlpackage
-            echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-          else
-            echo "dotnet/SqlPackage not found"; exit 1
+          set -e
+          # dotnet 확인
+          if ! command -v dotnet >/dev/null 2>&1; then
+            echo "::error::dotnet SDK가 이 러너에 설치되어 있지 않습니다. dotnet을 사전 설치하거나, 러너 이미지를 수정하세요."
+            exit 1
           fi
 
+          # sqlpackage 확인 및 설치/업데이트
+          if ! command -v sqlpackage >/dev/null 2>&1; then
+            echo "SqlPackage not found. Installing as a .NET global tool..."
+            dotnet tool install -g microsoft.sqlpackage || dotnet tool update -g microsoft.sqlpackage
+          else
+            echo "SqlPackage found. Updating to latest if possible..."
+            dotnet tool update -g microsoft.sqlpackage || true
+          fi
+
+          # PATH 반영 (Linux/macOS 환경에서 중요)
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+          echo "SqlPackage version:"
+          sqlpackage /Version
+
+      # 2) 입력값 검증 (Secrets와 DACPAC 유무 등)
+      - name: Validate inputs & files
+        env:
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_NAME:   ${{ secrets.DB_NAME }}
+          DB_USER:   ${{ secrets.DB_USER }}
+          DB_PASS:   ${{ secrets.DB_PASS }}
+        run: |
+          set -e
+          # Secrets 존재 검사 (값 노출 금지)
+          [ -z "${DB_SERVER:-}" ] && { echo "::error::Missing secret DB_SERVER"; exit 1; }
+          [ -z "${DB_NAME:-}"   ] && { echo "::error::Missing secret DB_NAME";   exit 1; }
+          [ -z "${DB_USER:-}"   ] && { echo "::error::Missing secret DB_USER";   exit 1; }
+          [ -z "${DB_PASS:-}"   ] && { echo "::error::Missing secret DB_PASS";   exit 1; }
+
+          # DACPAC 경로 확인
+          if [ ! -f "db/Database.dacpac" ]; then
+            echo "::error::DACPAC not found at db/Database.dacpac"
+            echo "리포 내 DACPAC 경로를 확인하거나, 빌드 단계에서 산출하도록 구성하세요."
+            exit 1
+          fi
+
+      # 3) 연결 사전 점검(선택) - 간단한 TCP 포트 체크
+      #    Linux 러너 기준. Windows라면 Test-NetConnection 사용 가능
+      - name: Optional - quick TCP check to SQL port
+        if: runner.os == 'Linux'
+        env:
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+        run: |
+          set -e
+          # DB_SERVER 형식: host,port 또는 host (port=1433)
+          HOST="${DB_SERVER%%,*}"
+          PORT="${DB_SERVER#*,}"
+          [ "$HOST" = "$PORT" ] && PORT=1433
+          echo "Checking TCP connectivity to $HOST:$PORT ..."
+          (echo > /dev/tcp/$HOST/$PORT) >/dev/null 2>&1 || {
+            echo "::warning:: $HOST:$PORT 로 TCP 연결이 되지 않습니다. 방화벽/네트워크를 확인하세요."
+          }
+
+      # 4) 사전 검증 모드(What-If): 변경 스크립트만 생성하고 종료(필요시 주석 해제)
+      # - 실제 반영 전 변경 내용을 검토하고 싶을 때 사용하세요.
+      # - 생성된 스크립트를 아티팩트로 업로드합니다.
+      #- name: Preview changes (Generate script only)
+      #  env:
+      #    DB_SERVER: ${{ secrets.DB_SERVER }}
+      #    DB_NAME:   ${{ secrets.DB_NAME }}
+      #    DB_USER:   ${{ secrets.DB_USER }}
+      #    DB_PASS:   ${{ secrets.DB_PASS }}
+      #  run: |
+      #    set -e
+      #    sqlpackage /Action:Script \
+      #      /SourceFile:"db/Database.dacpac" \
+      #      /TargetServerName:"$DB_SERVER" \
+      #      /TargetDatabaseName:"$DB_NAME" \
+      #      /TargetUser:"$DB_USER" \
+      #      /TargetPassword:"$DB_PASS" \
+      #      /p:BlockOnPossibleDataLoss=false \
+      #      /OutputPath:"deploy-preview.sql"
+      #
+      #- name: Upload deployment preview
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: deploy-preview-sql
+      #    path: deploy-preview.sql
+
+      # 5) 실제 배포 (Publish)
       - name: Publish DACPAC
         env:
           DB_SERVER: ${{ secrets.DB_SERVER }}
@@ -27,6 +109,10 @@ jobs:
           DB_USER:   ${{ secrets.DB_USER }}
           DB_PASS:   ${{ secrets.DB_PASS }}
         run: |
+          set -e
+          # 보안/호환 옵션: 필요 시 Encrypt/TLS/TrustServerCertificate 등을 추가 가능
+          #  - 내부망/자체 인증서라면 /p:Encrypt=True /p:TrustServerCertificate=True 조합 고려
+          #  - 인증서 체인이 올바르면 TrustServerCertificate=False 권장
           sqlpackage /Action:Publish \
             /SourceFile:"db/Database.dacpac" \
             /TargetServerName:"$DB_SERVER" \
@@ -34,3 +120,13 @@ jobs:
             /TargetUser:"$DB_USER" \
             /TargetPassword:"$DB_PASS" \
             /p:BlockOnPossibleDataLoss=false
+
+      # 6) 배포 결과물/로그 수집(선택)
+      # - sqlpackage는 /Diagnostics:true /DiagnosticsFile: 로 자세한 로그를 남길 수 있습니다.
+      #   위 Publish 단계에 옵션을 추가했다면 해당 파일을 업로드하세요.
+      #- name: Upload logs
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: sqlpackage-logs
+      #    path: sqlpackage-diagnostics.log
+``
