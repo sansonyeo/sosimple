@@ -1,0 +1,36 @@
+# .github/workflows/db-deploy-dacpac.yml
+name: DB Schema Deploy (DACPAC)
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, db]     # OS 무관 (sqlpackage만 설치되어 있으면 OK)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure SqlPackage on PATH
+        run: |
+          if command -v sqlpackage >/dev/null 2>&1; then
+            echo "SqlPackage found"
+          elif command -v dotnet >/dev/null 2>&1; then
+            dotnet tool update -g microsoft.sqlpackage
+            echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+          else
+            echo "dotnet/SqlPackage not found"; exit 1
+          fi
+
+      - name: Publish DACPAC
+        env:
+          DB_SERVER: ${{ secrets.DB_SERVER }}
+          DB_NAME:   ${{ secrets.DB_NAME }}
+          DB_USER:   ${{ secrets.DB_USER }}
+          DB_PASS:   ${{ secrets.DB_PASS }}
+        run: |
+          sqlpackage /Action:Publish \
+            /SourceFile:"db/Database.dacpac" \
+            /TargetServerName:"$DB_SERVER" \
+            /TargetDatabaseName:"$DB_NAME" \
+            /TargetUser:"$DB_USER" \
+            /TargetPassword:"$DB_PASS" \
+            /p:BlockOnPossibleDataLoss=false
