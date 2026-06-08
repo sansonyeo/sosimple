@@ -1,46 +1,40 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title></title>
-    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $("#BTNSERVICE").click(function (event) {
-                event.preventDefault();
-
-                var webserUrl = "https://121.167.154.140:86/WebService1.asmx";
-                var soapRequest = '<?xml version="1.0" encoding="utf-8"?>'
-                    + '<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
-                    + ' xmlns:xsd="http://www.w3.org/2001/XMLSchema"'
-                    + ' xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
-                    + '  <soap:Body>'
-                    + '    <SelectTable xmlns="http://mt8848.kr/">'
-                    + '      <table_name>TBA_업로드H</table_name>'
-                    + '    </SelectTable>'
-                    + '  </soap:Body>'
-                    + '</soap:Envelope>';
-
-                $.ajax({
-                    type: "POST",
-                    url: webserUrl,
-                    contentType: "text/xml; charset=utf-8",
-                    dataType: "xml",
-                    data: soapRequest,
-                    headers: { "SOAPAction": "http://mt8848.kr/SelectTable" },
-                    success: function (data) {
-                        var result = $(data).find("SelectTableResult").text();
-                        alert("결과: " + result);
-                    },
-                    error: function (xhr, status, err) {
-                        alert("오류: " + xhr.responseText + "\n" + status);
-                    }
+    <head>
+            <title></title>
+        <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+        <script type="text/javascript">
+                $(document).ready(function () {
+                                $("#BTNSERVICE").click(function (event) {
+                                                    event.preventDefault();
+                                    
+                                                                       var webserUrl = "https://121.167.154.140:86/WebService1.asmx/SelectTable";
+                                    
+                                                                       $.ajax({
+                                                                                               type: "GET",
+                                                                                               url: webserUrl,
+                                                                                               data: {
+                                                                                                                           table_name: "TBA_일로드H",
+                                                                                                                           condition: ""
+                                                                                                   },
+                                                                                               dataType: "xml",
+                                                                                               success: function (data) {
+                                                                                                                           var result = new XMLSerializer().serializeToString(data);
+                                                                                                                           alert("결과: " + result);
+                                                                                                   },
+                                                                                               error: function (xhr, status, err) {
+                                                                                                                           alert("오류: " + xhr.responseText + "\n" + status);
+                                                                                                   }
+                                                                           });
+                                });
                 });
-            });
-        });
-    </script>
-</head>
+        </script>
+    </head>
 <body>
-    <button id="BTNSERVICE">웹서비스 호출</button>
-    SAMPLE Application to test service
+        <button id="BTNSERVICE">웹서비스 호출</button>
+        SAMPLE Application to test service
 </body>
-</html>  
+</html>
+</body></title>
+    </head>
+</html>
