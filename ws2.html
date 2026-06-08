@@ -14,7 +14,9 @@
                     + ' xmlns:xsd="http://www.w3.org/2001/XMLSchema"'
                     + ' xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
                     + '  <soap:Body>'
-                    + '    <SelectTest xmlns="http://mt8848.kr/" />'
+                    + '    <SelectTable xmlns="http://mt8848.kr/">'
+                    + '      <table_name>TBA_업로드H</table_name>'
+                    + '    </SelectTable>'
                     + '  </soap:Body>'
                     + '</soap:Envelope>';
 
@@ -24,9 +26,9 @@
                     contentType: "text/xml; charset=utf-8",
                     dataType: "xml",
                     data: soapRequest,
-                    headers: { "SOAPAction": "http://mt8848.kr/SelectTest" },
+                    headers: { "SOAPAction": "http://mt8848.kr/SelectTable" },
                     success: function (data) {
-                        var result = $(data).find("SelectTestResult").text();
+                        var result = $(data).find("SelectTableResult").text();
                         alert("결과: " + result);
                     },
                     error: function (xhr, status, err) {
