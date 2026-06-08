@@ -1,38 +1,38 @@
 <!DOCTYPE html>
 <html>
     <head>
-            <title></title>
-        <script src="https://code.jquery.com/jquery-latest.min.js"></script>
-        <script type="text/javascript">
-                $(document).ready(function () {
-                                $("#BTNSERVICE").click(function (event) {
-                                                    event.preventDefault();
-                                    
-                                                                       var webserUrl = "https://121.167.154.140:86/WebService1.asmx/SelectTable";
-                                    
-                                                                       $.ajax({
-                                                                                               type: "GET",
-                                                                                               url: webserUrl,
-                                                                                               data: {
-                                                                                                                           table_name: "TBA_일로드H",
-                                                                                                                           condition: ""
-                                                                                                   },
-                                                                                               dataType: "xml",
-                                                                                               success: function (data) {
-                                                                                                                           var result = new XMLSerializer().serializeToString(data);
-                                                                                                                           alert("결과: " + result);
-                                                                                                   },
-                                                                                               error: function (xhr, status, err) {
-                                                                                                                           alert("오류: " + xhr.responseText + "\n" + status);
-                                                                                                   }
-                                                                           });
-                                });
-                });
-        </script>
+        <title></title>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function () {
+            $("#BTNSERVICE").click(function (event) {
+                        event.preventDefault();
+                
+                                           var webserUrl = "https://121.167.154.140:86/WebService1.asmx/SelectTable";
+                
+                                           $.ajax({
+                                                           type: "GET",
+                                                           url: webserUrl,
+                                                           data: {
+                                                                               table_name: "TBA_일로드H",
+                                                                               condition: ""
+                                                           },
+                                                           dataType: "xml",
+                                                           success: function (data) {
+                                                                               var result = new XMLSerializer().serializeToString(data);
+                                                                               alert("결과: " + result);
+                                                           },
+                                                           error: function (xhr, status, err) {
+                                                                               alert("오류: " + xhr.responseText + "\n" + status);
+                                                           }
+                                           });
+            });
+    });
+    </script>
     </head>
 <body>
-        <button id="BTNSERVICE">웹서비스 호출</button>
-        SAMPLE Application to test service
+    <button id="BTNSERVICE">웹서비스 호출</button>
+    SAMPLE Application to test service
 </body>
 </html>
 </body></title>
