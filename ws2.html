@@ -28,43 +28,63 @@
 
                     // xsi:nil="true" 이면 데이터 없음
                     var isNil = root.getAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "nil") === "true";
-                    if (isNil || root.childNodes.length === 0) {
+                    if (isNil) {
                         $("#result").html("<p>데이터 없음</p>");
                         return;
                     }
 
-                    var ns = root.namespaceURI;
-
-                    // 첫 번째 element 행에서 컬럼명 추출
-                    var firstRow = null;
-                    for (var i = 0; i < root.childNodes.length; i++) {
-                        if (root.childNodes[i].nodeType === 1) { firstRow = root.childNodes[i]; break; }
-                    }
-                    if (!firstRow) { $("#result").html("<p>데이터 없음</p>"); return; }
-
+                    // xs:schema 에서 컬럼명 순서대로 추출
+                    var xsNS = "http://www.w3.org/2001/XMLSchema";
                     var cols = [];
-                    for (var j = 0; j < firstRow.childNodes.length; j++) {
-                        if (firstRow.childNodes[j].nodeType === 1) {
-                            cols.push(firstRow.childNodes[j].localName);
+                    var schemaEls = root.getElementsByTagNameNS(xsNS, "schema");
+                    if (schemaEls.length > 0) {
+                        var xsElements = schemaEls[0].getElementsByTagNameNS(xsNS, "element");
+                        for (var i = 0; i < xsElements.length; i++) {
+                            var el = xsElements[i];
+                            if (el.parentNode && el.parentNode.localName === "sequence") {
+                                cols.push(el.getAttribute("name"));
+                            }
                         }
                     }
 
-                    // 헤더
+                    // diffgr:diffgram > DocumentElement > Table 행 추출
+                    var diffgramNS = "urn:schemas-microsoft-com:xml-diffgram-v1";
+                    var rows = [];
+                    var diffgramEls = root.getElementsByTagNameNS(diffgramNS, "diffgram");
+                    if (diffgramEls.length > 0) {
+                        var docEl = diffgramEls[0].getElementsByTagName("DocumentElement")[0];
+                        if (docEl) {
+                            for (var i = 0; i < docEl.childNodes.length; i++) {
+                                if (docEl.childNodes[i].nodeType === 1) rows.push(docEl.childNodes[i]);
+                            }
+                        }
+                    }
+
+                    // 스키마 없으면 첫 행에서 컬럼명 추출
+                    if (cols.length === 0 && rows.length > 0) {
+                        for (var j = 0; j < rows[0].childNodes.length; j++) {
+                            if (rows[0].childNodes[j].nodeType === 1) cols.push(rows[0].childNodes[j].localName);
+                        }
+                    }
+
+                    if (rows.length === 0) {
+                        $("#result").html("<p>데이터 없음</p>");
+                        return;
+                    }
+
+                    // 테이블 렌더링
                     var html = "<table><thead><tr>";
                     cols.forEach(function (col) { html += "<th>" + col + "</th>"; });
                     html += "</tr></thead><tbody>";
 
-                    // 데이터 행
-                    for (var i = 0; i < root.childNodes.length; i++) {
-                        var row = root.childNodes[i];
-                        if (row.nodeType !== 1) continue;
+                    rows.forEach(function (row) {
                         html += "<tr>";
                         cols.forEach(function (col) {
-                            var cell = row.getElementsByTagNameNS(ns, col)[0] || row.getElementsByTagName(col)[0];
-                            html += "<td>" + (cell ? cell.textContent : "") + "</td>";
+                            var cell = row.getElementsByTagName(col)[0];
+                            html += "<td>" + (cell ? (cell.textContent || "") : "") + "</td>";
                         });
                         html += "</tr>";
-                    }
+                    });
 
                     html += "</tbody></table>";
                     $("#result").html(html);
