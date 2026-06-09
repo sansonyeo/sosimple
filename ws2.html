@@ -1,40 +1,84 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title></title>
+<head>
+    <title>WS2 Test</title>
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <style>
+        table { border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #aaa; padding: 6px 12px; text-align: left; }
+        th { background: #f0f0f0; }
+    </style>
     <script type="text/javascript">
     $(document).ready(function () {
-            $("#BTNSERVICE").click(function (event) {
-                        event.preventDefault();
-                
-                                           var webserUrl = "https://api.mt8848.kr/WebService1.asmx/SelectTable";
-                
-                                           $.ajax({
-                                                           type: "GET",
-                                                           url: webserUrl,
-                                                           data: {
-                                                                               table_name: "TBA_일로드H",
-                                                                               condition: ""
-                                                           },
-                                                           dataType: "xml",
-                                                           success: function (data) {
-                                                                               var result = new XMLSerializer().serializeToString(data);
-                                                                               alert("결과: " + result);
-                                                           },
-                                                           error: function (xhr, status, err) {
-                                                                               alert("오류: " + xhr.responseText + "\n" + status);
-                                                           }
-                                           });
+        $("#BTNSERVICE").click(function (event) {
+            event.preventDefault();
+
+            var webserUrl = "https://api.mt8848.kr/WebService1.asmx/SelectTable";
+
+            $.ajax({
+                type: "GET",
+                url: webserUrl,
+                data: {
+                    table_name: "TBA_일로드H",
+                    condition: ""
+                },
+                dataType: "xml",
+                success: function (data) {
+                    var root = data.documentElement;
+
+                    // xsi:nil="true" 이면 데이터 없음
+                    var isNil = root.getAttributeNS("http://www.w3.org/2001/XMLSchema-instance", "nil") === "true";
+                    if (isNil || root.childNodes.length === 0) {
+                        $("#result").html("<p>데이터 없음</p>");
+                        return;
+                    }
+
+                    var ns = root.namespaceURI;
+
+                    // 첫 번째 element 행에서 컬럼명 추출
+                    var firstRow = null;
+                    for (var i = 0; i < root.childNodes.length; i++) {
+                        if (root.childNodes[i].nodeType === 1) { firstRow = root.childNodes[i]; break; }
+                    }
+                    if (!firstRow) { $("#result").html("<p>데이터 없음</p>"); return; }
+
+                    var cols = [];
+                    for (var j = 0; j < firstRow.childNodes.length; j++) {
+                        if (firstRow.childNodes[j].nodeType === 1) {
+                            cols.push(firstRow.childNodes[j].localName);
+                        }
+                    }
+
+                    // 헤더
+                    var html = "<table><thead><tr>";
+                    cols.forEach(function (col) { html += "<th>" + col + "</th>"; });
+                    html += "</tr></thead><tbody>";
+
+                    // 데이터 행
+                    for (var i = 0; i < root.childNodes.length; i++) {
+                        var row = root.childNodes[i];
+                        if (row.nodeType !== 1) continue;
+                        html += "<tr>";
+                        cols.forEach(function (col) {
+                            var cell = row.getElementsByTagNameNS(ns, col)[0] || row.getElementsByTagName(col)[0];
+                            html += "<td>" + (cell ? cell.textContent : "") + "</td>";
+                        });
+                        html += "</tr>";
+                    }
+
+                    html += "</tbody></table>";
+                    $("#result").html(html);
+                },
+                error: function (xhr, status, err) {
+                    alert("오류: " + xhr.responseText + "\n" + status);
+                }
             });
+        });
     });
     </script>
-    </head>
+</head>
 <body>
     <button id="BTNSERVICE">웹서비스 호출</button>
-    SAMPLE Application to test service
+    <div id="result"></div>
 </body>
-</html>
-</body></title>
-    </head>
 </html>
