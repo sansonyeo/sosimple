@@ -13,13 +13,19 @@
         $("#BTNSERVICE").click(function (event) {
             event.preventDefault();
 
+            var tableName = $("#TABLE_NAME").val().trim();
+            if (!tableName) {
+                alert("테이블명을 입력하세요.");
+                return;
+            }
+
             var webserUrl = "https://api.mt8848.kr/WebService1.asmx/SelectTable";
 
             $.ajax({
                 type: "GET",
                 url: webserUrl,
                 data: {
-                    table_name: "TBA_업로드H",
+                    table_name: tableName,
                     condition: ""
                 },
                 dataType: "xml",
@@ -98,6 +104,7 @@
     </script>
 </head>
 <body>
+    <input type="text" id="TABLE_NAME" placeholder="테이블명 입력" style="width:200px; padding:4px;" />
     <button id="BTNSERVICE">웹서비스 호출</button>
     <div id="result"></div>
 </body>
