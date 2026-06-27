@@ -10,9 +10,7 @@
     </style>
     <script type="text/javascript">
     $(document).ready(function () {
-        $("#BTNSERVICE").click(function (event) {
-            event.preventDefault();
-
+        function selectTable() {
             var tableName = $("#TABLE_NAME").val().trim();
             var condition = $("#CONDITION").val().trim();
             if (!tableName) {
@@ -100,7 +98,16 @@
                     alert("오류: " + xhr.responseText + "\n" + status);
                 }
             });
+        }
+
+        $("#BTNSERVICE").click(function (event) {
+            event.preventDefault();
+            selectTable();
         });
+
+        // 페이지 로딩 시 INFORMATION_SCHEMA.TABLES 바로 조회
+        $("#TABLE_NAME").val("INFORMATION_SCHEMA.TABLES");
+        selectTable();
     });
     </script>
 </head>
